@@ -1,0 +1,29 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+subscription_id            = "YOUR_SUBSCRIPTION_ID"
+resource_group_name        = "rg-snowflake-sql-resiliency"
+environment                = "prod"
+
+# Regions
+primary_location           = "eastus2"
+primary_location_short     = "eastus2"
+secondary_location         = "westus3"
+secondary_location_short   = "westus3"
+cloud_witness_location     = "eastus"
+
+# Compute
+sql_vm_size                = "Standard_E4ds_v5"
+sql_vm_size_secondary      = "Standard_E4ds_v4"
+admin_username             = "sqladmin"
+# admin_password           = "SET_VIA_TF_VAR_admin_password"
+
+# Storage
+cloud_witness_storage_name = "stcloudwitnessXXXXX"  # Must be globally unique
+
+# Private Link Service
+pls_auto_approval_subscription_ids = []
+pls_visibility_subscription_ids    = []
+
+# Disk sizes
+sql_data_disk_size_gb      = 256
+sql_log_disk_size_gb       = 128
