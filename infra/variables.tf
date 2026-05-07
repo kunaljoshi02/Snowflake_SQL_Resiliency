@@ -118,3 +118,67 @@ variable "pls_visibility_subscription_ids" {
   type        = list(string)
   default     = []
 }
+
+# =============================================================================
+# Failover Automation
+# =============================================================================
+
+variable "failover_storage_name" {
+  description = "Globally unique storage account name for failover Function App"
+  type        = string
+  default     = "stfailoversql001"
+}
+
+variable "snowflake_account" {
+  description = "Snowflake account identifier (e.g., xy12345.east-us-2.azure)"
+  type        = string
+  default     = ""
+}
+
+variable "snowflake_user" {
+  description = "Snowflake automation user for SQL API calls"
+  type        = string
+  default     = "FAILOVER_SVC"
+}
+
+variable "snowflake_role" {
+  description = "Snowflake role for failover operations"
+  type        = string
+  default     = "ACCOUNTADMIN"
+}
+
+variable "snowflake_warehouse" {
+  description = "Snowflake warehouse for executing failover SQL"
+  type        = string
+  default     = "COMPUTE_WH"
+}
+
+variable "snowflake_network_rule" {
+  description = "Fully qualified Snowflake network rule name"
+  type        = string
+  default     = ""
+}
+
+variable "snowflake_eai" {
+  description = "Snowflake external access integration name"
+  type        = string
+  default     = ""
+}
+
+variable "primary_pls_host" {
+  description = "Primary region PLS FQDN:port for Snowflake"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_pls_host" {
+  description = "Secondary region PLS FQDN:port for Snowflake"
+  type        = string
+  default     = ""
+}
+
+variable "failover_cooldown_seconds" {
+  description = "Cooldown period between failover events (seconds)"
+  type        = number
+  default     = 300
+}

@@ -1,0 +1,7 @@
+azure-functions
+azure-identity
+azure-keyvault-secrets
+azure-data-tables
+PyJWT>=2.0
+cryptography
+requests

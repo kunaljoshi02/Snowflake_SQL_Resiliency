@@ -267,3 +267,34 @@ module "pls_secondary" {
   tags                             = local.common_tags
 }
 
+# =============================================================================
+# Failover Automation (Azure Function + Monitor Alerts)
+# =============================================================================
+
+module "failover" {
+  source = "./modules/failover"
+
+  resource_group_name        = azurerm_resource_group.main.name
+  location                   = azurerm_resource_group.main.location
+  key_vault_name             = "kv-sqlfailover-${var.primary_location_short}"
+  func_storage_name          = var.failover_storage_name
+  app_service_plan_name      = "asp-failover-${var.primary_location_short}-001"
+  app_insights_name          = "appi-failover-${var.primary_location_short}-001"
+  function_app_name          = "func-sqlfailover-${var.primary_location_short}-001"
+  log_analytics_workspace_id = module.monitoring.workspace_id
+
+  snowflake_account      = var.snowflake_account
+  snowflake_user         = var.snowflake_user
+  snowflake_role         = var.snowflake_role
+  snowflake_warehouse    = var.snowflake_warehouse
+  snowflake_network_rule = var.snowflake_network_rule
+  snowflake_eai          = var.snowflake_eai
+  primary_pls_host       = var.primary_pls_host
+  secondary_pls_host     = var.secondary_pls_host
+  cooldown_seconds       = var.failover_cooldown_seconds
+
+  primary_lb_id   = module.lb_primary.lb_id
+  secondary_lb_id = module.lb_secondary.lb_id
+
+  tags = local.common_tags
+}

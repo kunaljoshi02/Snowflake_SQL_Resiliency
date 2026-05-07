@@ -87,6 +87,20 @@ output "log_analytics_workspace_id" {
 }
 
 # =============================================================================
+# Failover Automation Outputs
+# =============================================================================
+
+output "failover_function_url" {
+  description = "Failover Function App URL"
+  value       = module.failover.function_app_url
+}
+
+output "failover_key_vault_uri" {
+  description = "Key Vault URI for storing Snowflake private key"
+  value       = module.failover.key_vault_uri
+}
+
+# =============================================================================
 # Snowflake Integration Instructions
 # =============================================================================
 
