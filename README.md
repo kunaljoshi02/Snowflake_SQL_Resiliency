@@ -55,6 +55,21 @@ terraform apply -var="admin_password=YOUR_PASSWORD"
 4. Upload Snowflake RSA private key to Key Vault: `snowflake-private-key`
 5. Deploy the Azure Function code from `failover-function/`
 
+## Testing the Architecture
+
+1. **Connect via Bastion** to the jumpbox VM (`vm-jumpbox-001`) in Azure Portal
+   - Username: `sqladmin` / Password: `demo!pass123`
+2. **Open a browser** on the jumpbox and navigate to the SQL Tester app:
+   ```
+   https://ca-sql-tester-001.graypond-c3c5a3bf.eastus2.azurecontainerapps.io
+   ```
+3. **Enter connection details:**
+   - Host: `10.1.3.10` (App Gateway private IP)
+   - Port: `1433`
+   - Username: `sqladmin` / Password: `demo!pass123`
+   - Query: `SELECT TOP 10 FirstName, LastName FROM AdventureWorks2022.Person.Person`
+4. Click **Test Connection** — traffic flows: App Gateway → PE → PLS → ILB → SQL VM
+
 ## AdventureWorks Database
 
 The AdventureWorks2022 sample database is configured on all 4 SQL Server VMs.
@@ -67,8 +82,11 @@ The AdventureWorks2022 sample database is configured on all 4 SQL Server VMs.
 ├── failover-function/             # Azure Function for automated failover
 │   ├── function_app.py            # Main function code
 │   ├── requirements.txt           # Python dependencies
-│   ├── host.json                  # Function host config
-│   └── function.json              # Function bindings
+│   └── host.json                  # Function host config
+├── test-app/                      # SQL connectivity tester Flask app
+│   ├── app.py                     # Flask web UI
+│   ├── Dockerfile                 # Container image with ODBC driver
+│   └── requirements.txt           # Python dependencies
 ├── infra/                         # Terraform IaC
 │   ├── main.tf                    # Root module
 │   ├── variables.tf               # Input variables
@@ -79,6 +97,8 @@ The AdventureWorks2022 sample database is configured on all 4 SQL Server VMs.
 │       ├── networking/            # VNets, subnets, NSGs
 │       ├── loadbalancer/          # Internal Standard LBs
 │       ├── privatelink/           # Private Link Services
+│       ├── appgateway/            # App Gateway + Private Endpoints
+│       ├── testapp/               # Container App for SQL testing
 │       ├── failover/              # Function App, Alerts, Key Vault
 │       ├── monitoring/            # Log Analytics
 │       └── storage/               # Cloud Witness storage
