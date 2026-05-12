@@ -31,7 +31,7 @@ SECONDARY_PLS_HOST = os.environ.get("SECONDARY_PLS_HOST")  # e.g., "sql-secondar
 NETWORK_RULE_NAME = os.environ.get("SNOWFLAKE_NETWORK_RULE")  # e.g., "mydb.rules.sql_private_rule"
 EXTERNAL_ACCESS_INTEGRATION = os.environ.get("SNOWFLAKE_EAI")  # e.g., "sql_access_integration"
 
-COOLDOWN_SECONDS = int(os.environ.get("COOLDOWN_SECONDS", "300"))  # 5 min cooldown
+STATE_TABLE_ENDPOINT = os.environ.get("TABLE_STORAGE_ENDPOINT", "")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -97,7 +97,11 @@ def execute_snowflake_sql(token: str, statement: str) -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 def get_state_table():
     """Get or create the failover state table."""
-    service = TableServiceClient.from_connection_string(STATE_TABLE_CONN)
+    if STATE_TABLE_ENDPOINT:
+        credential = DefaultAzureCredential()
+        service = TableServiceClient(endpoint=STATE_TABLE_ENDPOINT, credential=credential)
+    else:
+        service = TableServiceClient.from_connection_string(os.environ.get("AzureWebJobsStorage", ""))
     service.create_table_if_not_exists("failoverstate")
     return service.get_table_client("failoverstate")
 
@@ -265,14 +269,22 @@ def failover_handler(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="failover/status", methods=["GET"], auth_level=func.AuthLevel.FUNCTION)
 def failover_status(req: func.HttpRequest) -> func.HttpResponse:
     """Return current failover state."""
-    state = get_current_state()
-    return func.HttpResponse(json.dumps({
-        "active_region": state.get("active_region"),
-        "last_failover_time": state.get("last_failover_time"),
-        "last_failover_reason": state.get("last_failover_reason"),
-        "failover_count": state.get("failover_count"),
-        "in_cooldown": is_in_cooldown(),
-    }), mimetype="application/json")
+    try:
+        state = get_current_state()
+        return func.HttpResponse(json.dumps({
+            "active_region": state.get("active_region"),
+            "last_failover_time": state.get("last_failover_time"),
+            "last_failover_reason": state.get("last_failover_reason"),
+            "failover_count": state.get("failover_count"),
+            "in_cooldown": is_in_cooldown(),
+        }), mimetype="application/json")
+    except Exception as e:
+        logging.error(f"Status check failed: {str(e)}")
+        return func.HttpResponse(json.dumps({
+            "status": "error",
+            "message": str(e),
+            "active_region": "unknown",
+        }), mimetype="application/json")
 
 
 @app.function_name("ManualFailover")

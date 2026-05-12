@@ -101,6 +101,39 @@ output "failover_key_vault_uri" {
 }
 
 # =============================================================================
+# Application Gateway Outputs
+# =============================================================================
+
+output "appgw_private_ip" {
+  description = "App Gateway private frontend IP — use as SQL Server host in test app"
+  value       = module.appgateway.appgw_private_ip
+}
+
+output "appgw_public_ip" {
+  description = "App Gateway public IP (management)"
+  value       = module.appgateway.appgw_public_ip
+}
+
+output "pe_primary_sql_ip" {
+  description = "PE private IP to primary SQL PLS"
+  value       = module.appgateway.pe_primary_ip
+}
+
+output "pe_secondary_sql_ip" {
+  description = "PE private IP to secondary SQL PLS"
+  value       = module.appgateway.pe_secondary_ip
+}
+
+# =============================================================================
+# Test App Outputs
+# =============================================================================
+
+output "test_app_url" {
+  description = "SQL connectivity test app URL"
+  value       = module.testapp.container_app_url
+}
+
+# =============================================================================
 # Snowflake Integration Instructions
 # =============================================================================
 

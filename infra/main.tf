@@ -298,3 +298,39 @@ module "failover" {
 
   tags = local.common_tags
 }
+
+# =============================================================================
+# Application Gateway + Private Endpoints to SQL PLS
+# =============================================================================
+
+module "appgateway" {
+  source = "./modules/appgateway"
+
+  resource_group_name   = azurerm_resource_group.main.name
+  location              = azurerm_resource_group.main.location
+  vnet_id               = module.networking_primary.vnet_id
+  vnet_name             = module.networking_primary.vnet_name
+  appgw_subnet_prefix   = "10.1.3.0/24"
+  pe_subnet_prefix      = "10.1.4.0/24"
+  appgw_name            = "agw-sql-${var.primary_location_short}-001"
+  primary_pls_id        = module.pls_primary.pls_id
+  secondary_pls_id      = module.pls_secondary.pls_id
+  tags                  = local.common_tags
+}
+
+# =============================================================================
+# Test App (Container App for SQL connectivity testing)
+# =============================================================================
+
+module "testapp" {
+  source = "./modules/testapp"
+
+  resource_group_name          = azurerm_resource_group.main.name
+  location                     = azurerm_resource_group.main.location
+  container_app_name           = "ca-sql-tester-001"
+  container_app_env_name       = "cae-sql-tester-${var.primary_location_short}-001"
+  vnet_id                      = module.networking_primary.vnet_id
+  vnet_name                    = module.networking_primary.vnet_name
+  container_app_subnet_prefix  = "10.1.8.0/23"
+  tags                         = local.common_tags
+}
