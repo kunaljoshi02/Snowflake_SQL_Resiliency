@@ -13,3 +13,14 @@ tfplan
 # OS
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.package-venv/
+.python_packages/
+*.zip
+
+# Function App local
+local.settings.json
